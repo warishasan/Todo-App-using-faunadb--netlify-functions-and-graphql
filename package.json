@@ -14,9 +14,11 @@
     "test": "echo \"Write tests! -> https://gatsby.dev/unit-testing\" && exit 1"
   },
   "dependencies": {
+    "bootstrap": "^4.5.3",
     "gatsby": "^2.24.79",
     "netlify-identity-widget": "^1.9.1",
     "react": "^16.12.0",
+    "react-bootstrap": "^1.3.0",
     "react-dom": "^16.12.0"
   },
   "devDependencies": {
