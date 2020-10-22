@@ -1,4 +1,3 @@
-  
 const { ApolloServer, gql } = require("apollo-server-lambda");
 
 const typeDefs = gql`

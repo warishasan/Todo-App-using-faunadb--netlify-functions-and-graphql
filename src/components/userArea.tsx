@@ -7,14 +7,46 @@ import {identityContext} from '../context/authContext'
 import Form from 'react-bootstrap/Form'
 import ListGroup from 'react-bootstrap/ListGroup'
 import TodoReducer from '../reducer/todoReducer'
+import { useQuery,useMutation,gql } from '@apollo/client';
+
+const ADD_TODO = gql`
+mutation AddTodo ($value: String!){
+    addTodo(value: $value){
+    id
+}
+}
+`;
+
+
+const GET_TODOS = gql`
+query GetTodos{
+    todos{
+        id
+        value
+        done
+    }
+}
+`;
+
+const UPDATE_TODO_DONE = gql`
+mutation UpdateTodo ($id: ID!){
+    updateTodoDone(id: $id){
+    value
+    done
+}
+}
+`;
 
 
 export default function UserArea (props:RouteComponentProps) {
-    
+    const [addTodo] = useMutation(ADD_TODO)
+    const [updateTodoDone] = useMutation(UPDATE_TODO_DONE)
+    const {loading,error,data,refetch} = useQuery(GET_TODOS)
+
     const {user} = useContext(identityContext)
     const inputRef = useRef<any>()
-    const [state,dispatch] = useReducer(TodoReducer, [])
 
+    console.log(data)
     return (
     (!!user ?
         <div>
@@ -23,17 +55,21 @@ export default function UserArea (props:RouteComponentProps) {
         <Form.Group controlId="TaskInput">
     <Form.Control ref = {inputRef} type="text" placeholder="Add a new task" />
   </Form.Group>
-  <Button onClick = {()=>{ dispatch({type:"ADDTODO", payload:{value : inputRef.current.value, done: false}})
-
+  <Button onClick = {async ()=>{ await addTodo({variables: {value:inputRef.current.value }})
+  console.log(inputRef.current.value)
         inputRef.current.value = "";
+       await refetch();
+        
 }}>Add Task</Button>
 
 
   <ListGroup variant="flush">
+{loading? <div>Loading...</div>: null}
+{error? <div>{error.message}</div>: null}
 
-{state.map((todo,ind)=>
-  <ListGroup.Item key = {ind}>
-<Form.Group controlId="formBasicCheckbox" onClick = {(e)=>{dispatch({type:"TOGGLETODO", payload:{value : "", done: false, id: ind}})}}>
+{(!loading && !error) && data.todos.map((todo)=>
+  <ListGroup.Item key = {todo.id}>
+<Form.Group controlId="formBasicCheckbox" onClick = {(e)=>{ updateTodoDone({variables: {id:todo.id }})}}>
 <Form.Check type="checkbox"/>
 <span>{todo.value}</span>
 </Form.Group>
