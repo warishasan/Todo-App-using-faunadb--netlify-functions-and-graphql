@@ -1643,6 +1643,11 @@
   dependencies:
     "@types/node" "*"
 
+"@types/netlify-identity-widget@^1.9.0":
+  version "1.9.0"
+  resolved "https://registry.yarnpkg.com/@types/netlify-identity-widget/-/netlify-identity-widget-1.9.0.tgz#b7628eb5c76228aa9477f1b6caef9f1f16e6e4aa"
+  integrity sha512-2g5N3v2sOsLCiDrtGQfZwnmTkikMPUKb5VtsJ5BTPsBDHLfxsCsFEE6MnZHKavAK/nTJWh0MkqylkhnyjoWU5Q==
+
 "@types/node-fetch@2":
   version "2.5.7"
   resolved "https://registry.yarnpkg.com/@types/node-fetch/-/node-fetch-2.5.7.tgz#20a2afffa882ab04d44ca786449a276f9f6bbf3c"
@@ -5529,6 +5534,13 @@ gatsby-page-utils@^0.2.28:
     glob "^7.1.6"
     lodash "^4.17.20"
     micromatch "^4.0.2"
+
+gatsby-plugin-create-client-paths@^2.3.13:
+  version "2.3.13"
+  resolved "https://registry.yarnpkg.com/gatsby-plugin-create-client-paths/-/gatsby-plugin-create-client-paths-2.3.13.tgz#d75f2477688aa6032452572f72a81c645df2ec73"
+  integrity sha512-7MYVDNcGdIVjoV3ymYsrDafRxOv+l0Agcz0KS6cT4+8RIiXM0tVglvCKCxnqNAjhLQmp1JFCryyl/jM2/6jzRQ==
+  dependencies:
+    "@babel/runtime" "^7.11.2"
 
 gatsby-plugin-page-creator@^2.3.33:
   version "2.3.33"
