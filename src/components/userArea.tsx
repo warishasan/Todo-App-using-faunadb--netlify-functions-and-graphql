@@ -1,94 +1,127 @@
-import React, {useEffect, useState, useContext,useRef,useReducer} from "react"
-import PageLayout from '../pageLayout/pageLayout'
-import Button from 'react-bootstrap/Button'
-import * as netlifyIdentity from "netlify-identity-widget"
-import {Router, RouteComponentProps,Link} from "@reach/router"
-import {identityContext} from '../context/authContext'
-import Form from 'react-bootstrap/Form'
-import ListGroup from 'react-bootstrap/ListGroup'
-import TodoReducer from '../reducer/todoReducer'
-import { useQuery,useMutation,gql } from '@apollo/client';
+import React, { useContext, useRef } from "react"
+import Button from "react-bootstrap/Button"
+import { RouteComponentProps } from "@reach/router"
+import { identityContext } from "../context/authContext"
+import Form from "react-bootstrap/Form"
+import ListGroup from "react-bootstrap/ListGroup"
+import { useQuery, useMutation, gql } from "@apollo/client"
+const styles = require("./userArea.module.css")
+import Jumbotron from "react-bootstrap/Jumbotron"
 
 const ADD_TODO = gql`
-mutation AddTodo ($value: String!){
-    addTodo(value: $value){
-    id
-}
-}
-`;
-
+  mutation AddTodo($value: String!) {
+    addTodo(value: $value) {
+      id
+    }
+  }
+`
 
 const GET_TODOS = gql`
-query GetTodos{
-    todos{
-        id
-        value
-        done
+  query GetTodos {
+    todos {
+      id
+      value
+      done
     }
-}
-`;
+  }
+`
 
 const UPDATE_TODO_DONE = gql`
-mutation UpdateTodo ($id: ID!){
-    updateTodoDone(id: $id){
-    value
-    done
-}
-}
-`;
+  mutation UpdateTodo($id: ID!) {
+    updateTodoDone(id: $id) {
+      value
+      done
+    }
+  }
+`
 
+export default function UserArea(props: RouteComponentProps) {
+  const [addTodo] = useMutation(ADD_TODO)
+  const [updateTodoDone] = useMutation(UPDATE_TODO_DONE)
+  const { loading, error, data, refetch } = useQuery(GET_TODOS)
 
-export default function UserArea (props:RouteComponentProps) {
-    const [addTodo] = useMutation(ADD_TODO)
-    const [updateTodoDone] = useMutation(UPDATE_TODO_DONE)
-    const {loading,error,data,refetch} = useQuery(GET_TODOS)
+  const { user, identity } = useContext(identityContext)
+  const inputRef = useRef<any>()
 
-    const {user} = useContext(identityContext)
-    const inputRef = useRef<any>()
-
+  if (!loading && !error) {
     console.log(data)
-    return (
-    (!!user ?
-        <div>
-        <h2>{user.user_metadata.full_name}'s Notebook</h2>
+  }
+  return !!user ? (
+    <Jumbotron className={styles.jumbotron}>
+      <Button
+        className={styles.logout}
+        onClick={() => {
+          identity.logout()
+        }}
+        variant="primary"
+      >
+        Logout
+      </Button>
 
-        <Form.Group controlId="TaskInput">
-    <Form.Control ref = {inputRef} type="text" placeholder="Add a new task" />
-  </Form.Group>
-  <Button onClick = {async ()=>{ await addTodo({variables: {value:inputRef.current.value }})
-  console.log(inputRef.current.value)
-        inputRef.current.value = "";
-       await refetch();
-        
-}}>Add Task</Button>
+      <h2>{user.user_metadata.full_name}'s Notebook</h2>
 
+      <div className={styles.inputContainer}>
+        <Form.Control
+          className={styles.input}
+          ref={inputRef}
+          type="text"
+          placeholder="Add a new task"
+        />
+        <Button
+          className={styles.addTaskButton}
+          onClick={async () => {
+            await addTodo({ variables: { value: inputRef.current.value } })
+            console.log(inputRef.current.value)
+            inputRef.current.value = ""
+            await refetch()
+          }}
+        >
+          Add Task
+        </Button>
+      </div>
 
-  <ListGroup variant="flush">
-{loading? <div>Loading...</div>: null}
-{error? <div>{error.message}</div>: null}
+      <ListGroup variant="flush">
+        {loading ? <div>Loading...</div> : null}
+        {error ? <div>{error.message}</div> : null}
 
-{(!loading && !error) && data.todos.map((todo)=>
-  <ListGroup.Item key = {todo.id}>
-<Form.Group controlId="formBasicCheckbox" onClick = {(e)=>{ updateTodoDone({variables: {id:todo.id }})}}>
-<Form.Check type="checkbox"/>
-<span>{todo.value}</span>
-</Form.Group>
-
-
-
-
-  </ListGroup.Item>
-  )}
- 
-</ListGroup>
-
-        </div>:
-        
-        <div>
-            login
-        </div>
- 
-    )
-    )
-
+        {!loading &&
+          !error &&
+          (data.todos.length === 0 ? (
+            <h5>Your todo list is empty</h5>
+          ) : (
+            data.todos.map(todo => (
+              <ListGroup.Item key={todo.id}>
+                <div>
+                  <Form.Check
+                    checked={todo.done}
+                    disabled={todo.done}
+                    className={styles.checkBox}
+                    type="checkbox"
+                    onClick={async e => {
+                      await updateTodoDone({ variables: { id: todo.id } })
+                      await refetch()
+                    }}
+                  />
+                  <p className={styles.todoText}>{todo.value}</p>
+                </div>
+              </ListGroup.Item>
+            ))
+          ))}
+      </ListGroup>
+    </Jumbotron>
+  ) : (
+    <div>
+      <Jumbotron className={styles.jumbotron}>
+        <h4>Please Login to view your dashboard</h4>
+        <Button
+          onClick={() => {
+            identity.open()
+          }}
+          variant="primary"
+        >
+          Login
+        </Button>
+      </Jumbotron>
+    </div>
+  )
 }
