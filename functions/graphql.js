@@ -22,7 +22,6 @@ const typeDefs = gql`
   }
 `;
 
-const todos = {};
 const resolvers = {
   Query: {
     todos: async (parent, args, {user}) => {

@@ -38,21 +38,23 @@ const UPDATE_TODO_DONE = gql`
 export default function UserArea(props: RouteComponentProps) {
   const [addTodo] = useMutation(ADD_TODO)
   const [updateTodoDone] = useMutation(UPDATE_TODO_DONE)
-  const { loading, error, data, refetch } = useQuery(GET_TODOS,{fetchPolicy:"cache-first"})
+  let { loading, error, data, refetch } = useQuery(GET_TODOS,{fetchPolicy:"cache-first"})
 
   const { user, identity } = useContext(identityContext)
   const inputRef = useRef<any>()
 
 
   React.useEffect(()=>{
-
+    error = null;
+    data = null;
+    loading = true;
     async function fetchData(){
         await refetch();
     }
 
     fetchData()
 
-  },[])
+  },[user])
 
   console.log("error",error)
   console.log("loading",loading)
