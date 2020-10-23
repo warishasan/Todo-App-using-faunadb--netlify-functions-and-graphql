@@ -38,14 +38,25 @@ const UPDATE_TODO_DONE = gql`
 export default function UserArea(props: RouteComponentProps) {
   const [addTodo] = useMutation(ADD_TODO)
   const [updateTodoDone] = useMutation(UPDATE_TODO_DONE)
-  const { loading, error, data, refetch } = useQuery(GET_TODOS)
+  const { loading, error, data, refetch } = useQuery(GET_TODOS,{fetchPolicy:"cache-first"})
 
   const { user, identity } = useContext(identityContext)
   const inputRef = useRef<any>()
 
-  if (!loading && !error) {
-    console.log(data)
-  }
+
+  React.useEffect(()=>{
+
+    async function fetchData(){
+        await refetch();
+    }
+
+    fetchData()
+
+  },[])
+
+  console.log("error",error)
+  console.log("loading",loading)
+  console.log("data,",data)
   return !!user ? (
     <Jumbotron className={styles.jumbotron}>
       <Button
@@ -81,11 +92,8 @@ export default function UserArea(props: RouteComponentProps) {
       </div>
 
       <ListGroup variant="flush">
-        {loading ? <div>Loading...</div> : null}
-        {error ? <div>{error.message}</div> : null}
-
-        {!loading &&
-          !error &&
+        {loading ? <div>Loading...</div> : 
+        error ? <div>{error.message}</div> : 
           (data.todos.length === 0 ? (
             <h5>Your todo list is empty</h5>
           ) : (
@@ -93,7 +101,7 @@ export default function UserArea(props: RouteComponentProps) {
               <ListGroup.Item key={todo.id}>
                 <div>
                   <Form.Check
-                    checked={todo.done}
+                    defaultChecked={todo.done}
                     disabled={todo.done}
                     className={styles.checkBox}
                     type="checkbox"
