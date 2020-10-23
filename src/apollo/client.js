@@ -10,14 +10,18 @@ const httpLink = new HttpLink({
 
 const authLink = setContext((_, { headers }) => {
 
-  let token =null;
+  netlifyIdentity.init({})
 
   const user = netlifyIdentity.currentUser()
-  if (user){
-   token = user.token.access_token
-}
+ 
+  let token = null;
+  if (!!user ){
+    token = user.token.access_token
+  }
+  
+  
 
-
+  console.log(user)
   return {
     headers: {
       ...headers,

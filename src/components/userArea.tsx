@@ -1,4 +1,4 @@
-import React, { useContext, useRef } from "react"
+import React, { useContext, useRef, useState } from "react"
 import Button from "react-bootstrap/Button"
 import { RouteComponentProps } from "@reach/router"
 import { identityContext } from "../context/authContext"
@@ -38,16 +38,13 @@ const UPDATE_TODO_DONE = gql`
 export default function UserArea(props: RouteComponentProps) {
   const [addTodo] = useMutation(ADD_TODO)
   const [updateTodoDone] = useMutation(UPDATE_TODO_DONE)
-  let { loading, error, data, refetch } = useQuery(GET_TODOS)
+  let { loading, error, data, refetch } = useQuery(GET_TODOS,{fetchPolicy:"cache-first"})
 
   const { user, identity } = useContext(identityContext)
   const inputRef = useRef<any>()
 
 
   React.useEffect(()=>{
-    error = null;
-    data = {todos:[]};
-    loading = true;
     async function fetchData(){
         await refetch();
     }
@@ -56,12 +53,11 @@ export default function UserArea(props: RouteComponentProps) {
 
   },[user])
 
-  console.log("error",error)
-  console.log("loading",loading)
-  console.log("data,",data)
-  return !!user ? (
+
+  return (
+  !!user ? (
     <Jumbotron className={styles.jumbotron}>
-      <Button
+      <Button disabled = {loading}
         className={styles.logout}
         onClick={() => {
           identity.logout()
@@ -94,7 +90,7 @@ export default function UserArea(props: RouteComponentProps) {
       </div>
 
       <ListGroup variant="flush">
-        {loading ? <div>Loading...</div> : 
+        {(loading ) ? <div>Loading...</div> : 
         error ? <div>{error.message}</div> : 
           (data.todos.length === 0 ? (
             <h5>Your todo list is empty</h5>
@@ -133,5 +129,6 @@ export default function UserArea(props: RouteComponentProps) {
         </Button>
       </Jumbotron>
     </div>
+  )
   )
 }
